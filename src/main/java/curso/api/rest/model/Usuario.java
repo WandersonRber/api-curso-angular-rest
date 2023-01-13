@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -74,11 +75,25 @@ public class Usuario implements UserDetails {
 	@JsonFormat(pattern = "dd/MM/yyyy")
 	@DateTimeFormat(iso= ISO.DATE, pattern = "dd/MM/yyyy")
 	private Date dataNascimento;
+	
+	@ManyToOne
+	private Profissao profissao;
+	
+
+	public Profissao getProfissao() {
+		return profissao;
+	}
+
+	public void setProfissao(Profissao profissao) {
+		this.profissao = profissao;
+	}
 
 	private String token = "";
 	
 	public Date getDataNascimento() {
 		return dataNascimento;
+		
+ 
 	}
 
 	public void setDataNascimento(Date dataNascimento) {
