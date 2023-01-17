@@ -166,47 +166,27 @@ public class IndexController {
 	}
 	
 
+	// Salva usuários e telefones
 	@PostMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> Cadastrar(@RequestBody Usuario usuario) throws Exception {
-
-		for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
-			usuario.getTelefones().get(pos).setUsuario(usuario);
+	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario){
+		
+		/* Corrigi data, salvando com 1 dia a menos */
+		int dia = usuario.getDataNascimento().getDate() + 1;
+		usuario.getDataNascimento().setDate(dia);
+		
+		for(int pos = 0; pos < usuario.getTelefones().size(); pos ++) {
+			
+			usuario.getTelefones().get(pos).setUsuario(usuario); //Faz referencia, para os telefones para salvar no banco
 		}
-
-		/* Cosumindo API externa */
-		URL url = new URL("https://viacep.com.br/ws/" + usuario.getCep() + "/json/");
-		URLConnection connection = url.openConnection();
-		InputStream is = connection.getInputStream();
-		BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-
-		String cep = "";
-		StringBuilder jsonCpe = new StringBuilder();
-
-		while ((cep = br.readLine()) != null) {
-			jsonCpe.append(cep);
-		}
-
-		System.out.println(jsonCpe.toString());
-
-		Usuario userAux = new Gson().fromJson(jsonCpe.toString(), Usuario.class);
-
-		usuario.setSenha(userAux.getCep());
-		usuario.setLogradouro(userAux.getLogradouro());
-		usuario.setComplemento(userAux.getComplemento());
-		usuario.setBairro(userAux.getBairro());
-		usuario.setLocalidade(userAux.getLocalidade());
-		usuario.setUf(userAux.getUf());
-
-		/* Cosumindo API externa */
-
+		
 		String senhacriptografada = new BCryptPasswordEncoder().encode(usuario.getSenha());
 		usuario.setSenha(senhacriptografada);
+		
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
-		ImplementacaoUserDetailsService.insereAcessoPadrao(usuarioSalvo.getId());
-
-		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
-
+		implementacaoUserDetailsService.insereAcessoPadrao(usuarioSalvo.getId
+		());
+		
+		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);		
 	}
 
 	@PutMapping(value = "/", produces = "application/json")

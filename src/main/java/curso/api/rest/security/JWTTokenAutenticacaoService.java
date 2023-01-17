@@ -21,7 +21,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JWTTokenAutenticacaoService {
 
 	/* Tempo de validade do Token 2 dias */
-	private static final long EXPIRATION_TIME = 172800000;
+	private static final long EXPIRATION_TIME =172800000;
 
 	/* Uma senha uinica para compor a autenticação e ajudar na segurança */
 	private static final String SECRET = "SenhaExtremamenteSecreta";
