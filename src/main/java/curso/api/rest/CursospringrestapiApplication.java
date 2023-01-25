@@ -34,13 +34,12 @@ public class CursospringrestapiApplication implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 
-		registry.addMapping("/usuario/**")
-		.allowedMethods("*")
-		.allowedOrigins("*");
+		registry.addMapping("/usuario/**").allowedMethods("*").allowedOrigins("*");
+
+		registry.addMapping("/profissao/**").allowedMethods("*").allowedOrigins("*");
 		
-		registry.addMapping("/profissao/**")
-		.allowedMethods("*")
-		.allowedOrigins("*");
+		registry.addMapping("/recuperar/**").allowedMethods("*").allowedOrigins("*");
+		/* Liberando o mapeamento de usuário para todas as origens */
 		/* Liberando o mapeamento de usuário para todas as origens */
 
 	}

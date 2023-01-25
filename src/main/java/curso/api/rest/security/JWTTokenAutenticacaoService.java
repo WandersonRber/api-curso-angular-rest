@@ -21,7 +21,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JWTTokenAutenticacaoService {
 
 	/* Tempo de validade do Token 2 dias */
-	private static final long EXPIRATION_TIME =172800000;
+	private static final long EXPIRATION_TIME = 172800000;
 
 	/* Uma senha uinica para compor a autenticação e ajudar na segurança */
 	private static final String SECRET = "SenhaExtremamenteSecreta";
@@ -46,11 +46,10 @@ public class JWTTokenAutenticacaoService {
 
 		/* Adiciona no cabeçalho http */
 		response.addHeader(HEADER_STRING, token); /* Authorization: */
-		
-		/*Liberando resposta para porta diferente do projeto Angular*/
+
+		/* Liberando resposta para porta diferente do projeto Angular */
 		response.addHeader("Access-Control-Allow-Origin", "*");
-		
-		
+
 		ApplicationContextLoad.getApplicationContext().getBean(UsuarioRepository.class).atualizaTokenUser(JWT,
 				username);
 
@@ -58,8 +57,6 @@ public class JWTTokenAutenticacaoService {
 		 * Liberando resposta para portas diferentes que usam a API ou caso clientes web
 		 */
 		liberacaoCors(response);
-		
-
 
 		/* Escreve token como resposta no corpo http */
 		response.getWriter().write("{\"Authorization\": \"" + token + "\"}");
@@ -93,9 +90,7 @@ public class JWTTokenAutenticacaoService {
 
 						if (tokenLimpo.equalsIgnoreCase(usuario.getToken())) {
 
-							return new UsernamePasswordAuthenticationToken(
-									usuario.getLogin(), 
-									usuario.getSenha(),
+							return new UsernamePasswordAuthenticationToken(usuario.getLogin(), usuario.getSenha(),
 									usuario.getAuthorities());
 
 						}
