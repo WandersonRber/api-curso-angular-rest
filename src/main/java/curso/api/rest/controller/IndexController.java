@@ -126,11 +126,12 @@ public class IndexController {
 		PageRequest pageRequest = null;
 		Page<Usuario> list = null;
 
-		if (nome == null || (nome != null && nome.trim().isEmpty()) || nome.equalsIgnoreCase("undefined")) /*Não informou o nome*/ {
+		if (nome == null || (nome != null && nome.trim().isEmpty())
+				|| nome.equalsIgnoreCase("undefined")) /* Não informou o nome */ {
 
 			pageRequest = PageRequest.of(0, 5, Sort.by("nome"));
 			list = usuarioRepository.findAll(pageRequest);
-			
+
 		} else {
 			pageRequest = PageRequest.of(0, 5, Sort.by("nome"));
 			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
@@ -139,23 +140,23 @@ public class IndexController {
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 
 	}
-	
-	
 
 	/* END-POINT consulta de usuário por nome */
 	@GetMapping(value = "/usuarioPorNome/{nome}/page/{page}", produces = "application/json")
 	@CacheEvict(value = "cacheusuarios", allEntries = true)
 	@CachePut("cacheusuarios")
-	public ResponseEntity<Page<Usuario>> usuarioPorNome(@PathVariable("nome") String nome, @PathVariable("page") int page) throws InterruptedException {
+	public ResponseEntity<Page<Usuario>> usuarioPorNome(@PathVariable("nome") String nome,
+			@PathVariable("page") int page) throws InterruptedException {
 
 		PageRequest pageRequest = null;
 		Page<Usuario> list = null;
 
-		if (nome == null || (nome != null && nome.trim().isEmpty()) || nome.equalsIgnoreCase("undefined")) /*Não informou o nome*/ {
+		if (nome == null || (nome != null && nome.trim().isEmpty())
+				|| nome.equalsIgnoreCase("undefined")) /* Não informou o nome */ {
 
 			pageRequest = PageRequest.of(page, 5, Sort.by("nome"));
 			list = usuarioRepository.findAll(pageRequest);
-			
+
 		} else {
 			pageRequest = PageRequest.of(page, 5, Sort.by("nome"));
 			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
@@ -164,29 +165,28 @@ public class IndexController {
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 
 	}
-	
 
 	// Salva usuários e telefones
 	@PostMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario){
-		
+	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
+
 		/* Corrigi data, salvando com 1 dia a menos */
 		int dia = usuario.getDataNascimento().getDate() + 1;
 		usuario.getDataNascimento().setDate(dia);
-		
-		for(int pos = 0; pos < usuario.getTelefones().size(); pos ++) {
-			
-			usuario.getTelefones().get(pos).setUsuario(usuario); //Faz referencia, para os telefones para salvar no banco
+
+		for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
+
+			usuario.getTelefones().get(pos).setUsuario(usuario); // Faz referencia, para os telefones para salvar no
+																	// banco
 		}
-		
+
 		String senhacriptografada = new BCryptPasswordEncoder().encode(usuario.getSenha());
 		usuario.setSenha(senhacriptografada);
-		
+
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
-		implementacaoUserDetailsService.insereAcessoPadrao(usuarioSalvo.getId
-		());
-		
-		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);		
+		implementacaoUserDetailsService.insereAcessoPadrao(usuarioSalvo.getId());
+
+		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
 
 	@PutMapping(value = "/", produces = "application/json")
