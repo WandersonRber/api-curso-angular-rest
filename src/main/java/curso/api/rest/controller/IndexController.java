@@ -5,9 +5,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -32,6 +38,7 @@ import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
 import curso.api.rest.repository.UsuarioRepository;
 import curso.api.rest.service.ImplementacaoUserDetailsService;
+import curso.api.rest.service.ServiceRelatorio;
 
 @RestController /* Arquitetura REST */
 @RequestMapping(value = "/usuario")
@@ -45,6 +52,9 @@ public class IndexController {
 
 	@Autowired
 	private ImplementacaoUserDetailsService implementacaoUserDetailsService;
+
+	@Autowired
+	private ServiceRelatorio serviceRelatorio;
 
 	/* Serviço RESTful */
 
@@ -217,11 +227,22 @@ public class IndexController {
 
 		return "ok";
 	}
+	
+	@GetMapping(value = "/relatorio", produces = "application/text")
+	public ResponseEntity<String> download(HttpServletRequest request) throws Exception{
+		byte[] pdf = serviceRelatorio.geraRelatorio("relatorio-usuario",
+				request.getServletContext());
+		
+		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
+		
+		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
+
+	}
 
 //	@PutMapping(value = "/{iduser}/idvenda/{idvenda}", produces = "application/json")
 //	public ResponseEntity updateVenda(@PathVariable Long iduser, @PathVariable Long idvenda) {
 //
-//		/* Outras rotinas ates de atualizar */
+//		/* Outras rotinas antes de atualizar */
 //		// Usuario usuarioSalvo = usuarioRepository.save(usuario);
 //		return new ResponseEntity("Venda atualizada", HttpStatus.OK);
 //	}
