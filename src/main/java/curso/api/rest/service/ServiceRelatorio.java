@@ -3,6 +3,7 @@ package curso.api.rest.service;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import java.sql.Connection;
@@ -22,7 +23,7 @@ public class ServiceRelatorio implements Serializable {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public byte[] geraRelatorio(String nomeRelatorio, ServletContext servletContext) throws Exception {
+	public byte[] geraRelatorio(String nomeRelatorio,Map<String,Object> params  ,ServletContext servletContext) throws Exception {
 
 		/* Obter a cconnectiononexão com o banco de dados */
 		Connection connection =  jdbcTemplate.getDataSource().getConnection();
@@ -33,8 +34,7 @@ public class ServiceRelatorio implements Serializable {
 				+ File.separator + nomeRelatorio + ".jasper";
 
 		/* Gerar o relatorio com os dados e conexão */
-		JasperPrint print = JasperFillManager.fillReport(caminhoJasper, new HashMap(),
-				  connection);
+		JasperPrint print = JasperFillManager.fillReport(caminhoJasper, params, connection);
 
 		/* Exporta para byte o PDF para fazer o download */
 		byte[] retorno = JasperExportManager.exportReportToPdf(print);
