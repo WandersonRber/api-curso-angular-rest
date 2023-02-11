@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 
+import curso.api.rest.model.UserChart;
 import curso.api.rest.model.UserReport;
 import curso.api.rest.model.Usuario;
 import curso.api.rest.repository.TelefoneRepository;
@@ -58,6 +60,9 @@ public class IndexController {
 
 	@Autowired
 	private ServiceRelatorio serviceRelatorio;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	/* Serviço RESTful */
 
@@ -264,6 +269,24 @@ public class IndexController {
 		
 		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
 
+	}
+	
+	@GetMapping(value= "/grafico", produces = "application/json")
+	public ResponseEntity<UserChart> grafico(){
+		
+		UserChart userChart = new UserChart();
+		
+		List<String> resultado = jdbcTemplate.queryForList("select array_agg( '''' || nome || '''') from usuario where salario > 0 and nome<> '' select cast(array_agg(salario) as character varying[])from usuario where salario > 0 and nome <> ''", String.class);
+		
+		if (!resultado.isEmpty()) {
+			String nomes = resultado.get(0).replaceAll("\\{", "").replaceAll("\\}", "");
+			String salario = resultado.get(1).replaceAll("\\{", "").replaceAll("\\}", "");
+		
+			userChart.setNome(nomes);
+			userChart.setSalario(salario);
+		}
+		
+		return new ResponseEntity<UserChart>(userChart, HttpStatus.OK);
 	}
 
 //	@PutMapping(value = "/{iduser}/idvenda/{idvenda}", produces = "application/json")
