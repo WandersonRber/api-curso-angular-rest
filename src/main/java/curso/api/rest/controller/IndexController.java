@@ -60,7 +60,7 @@ public class IndexController {
 
 	@Autowired
 	private ServiceRelatorio serviceRelatorio;
-	
+
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
@@ -235,57 +235,59 @@ public class IndexController {
 
 		return "ok";
 	}
-	
+
 	@GetMapping(value = "/relatorio", produces = "application/text")
-	public ResponseEntity<String> downloadRelatorio(HttpServletRequest request) throws Exception{
-		byte[] pdf = serviceRelatorio.geraRelatorio("relatorio-usuario", new HashMap(),
-				request.getServletContext());
-		
+	public ResponseEntity<String> downloadRelatorio(HttpServletRequest request) throws Exception {
+		byte[] pdf = serviceRelatorio.geraRelatorio("relatorio-usuario", new HashMap(), request.getServletContext());
+
 		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
-		
+
 		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
 
 	}
-	
+
 	@PostMapping(value = "/relatorio/", produces = "application/text")
-	public ResponseEntity<String> downloadRelatorioParam(HttpServletRequest request, @RequestBody UserReport userReport) throws Exception{
-		
+	public ResponseEntity<String> downloadRelatorioParam(HttpServletRequest request, @RequestBody UserReport userReport)
+			throws Exception {
+
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat dateFormatParam = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		String dataInicio = dateFormatParam.format(dateFormat.parse(userReport.getDataInicio()));
 		String dataFim = dateFormatParam.format(dateFormat.parse(userReport.getDataFim()));
-		
-		Map<String,Object> params = new HashMap<String,Object>();
-		
+
+		Map<String, Object> params = new HashMap<String, Object>();
+
 		params.put("DATA_INICIO", dataInicio);
 		params.put("DATA_FIM", dataFim);
-		
-		
-		byte[] pdf = serviceRelatorio.geraRelatorio("relatorio-usuario-param", params,
-				request.getServletContext());
-		
+
+		byte[] pdf = serviceRelatorio.geraRelatorio("relatorio-usuario-param", params, request.getServletContext());
+
 		String base64Pdf = "data:application/pdf;base64," + Base64.encodeBase64String(pdf);
-		
+
 		return new ResponseEntity<String>(base64Pdf, HttpStatus.OK);
 
 	}
-	
-	@GetMapping(value= "/grafico", produces = "application/json")
-	public ResponseEntity<UserChart> grafico(){
-		
+
+	@GetMapping(value = "/grafico", produces = "application/json")
+	public ResponseEntity<UserChart> grafico() {
+
 		UserChart userChart = new UserChart();
-		
-		List<String> resultado = jdbcTemplate.queryForList("select array_agg( '''' || nome || '''') from usuario where salario > 0 and nome<> '' select cast(array_agg(salario) as character varying[])from usuario where salario > 0 and nome <> ''", String.class);
-		
+
+		List<String> resultado = jdbcTemplate.queryForList(
+				"select array_agg(nome) from usuario where salario > 0 and nome <> '' union all select cast(array_agg(salario) as character varying[]) from usuario where salario > 0 and nome <> ''",
+				String.class);
+
 		if (!resultado.isEmpty()) {
+
 			String nomes = resultado.get(0).replaceAll("\\{", "").replaceAll("\\}", "");
 			String salario = resultado.get(1).replaceAll("\\{", "").replaceAll("\\}", "");
-		
+
 			userChart.setNome(nomes);
 			userChart.setSalario(salario);
+
 		}
-		
+
 		return new ResponseEntity<UserChart>(userChart, HttpStatus.OK);
 	}
 
