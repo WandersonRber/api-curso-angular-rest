@@ -11,45 +11,47 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.catalina.connector.Response;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 
 @Service
 public class ServiceEnviaEmail {
 	
-	private String userName = "wandersonjavatest@gmail.com";
-	private String senha = "wandersonJavaTest@";
+	@Value("${spring.sendgrid.api-key}")
+	private String apiKey;
+	
+	private String userName = "wanderson9100@outlook.com";
 	
 	public void enviarEmail(String assunto, String emailDestino, String mensagem) throws Exception {
-		
-		Properties properties = new Properties();
-		properties.put("mail.smtp.ssl.trust", "*");
-		properties.put("mail.smtp.auth", "true"); /* Autorização */
-		properties.put("mail.smtp.starttls", "true"); /* Autenticação */
-		properties.put("mail.smtp.host", "smtp.gmail.com"); /* servidor do  google */
-		properties.put("mail.smtp.port", "465"); /* Porta do servidor */
-		properties.put("mail.smtp.socketFactory.port", "465"); /* Expecifica porta socket */
-		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory"); /* Class de conexão socket */
-		
-		Session session = Session.getInstance(properties, new Authenticator() {
-			
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				
-				
-				return new PasswordAuthentication(userName, senha);
-			}
-			
-		});
-		
-		Address[] toUser = InternetAddress.parse(emailDestino);
-		
-		Message message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(userName)); /* Quem está enviando - Nós */
-		message.setRecipients(Message.RecipientType.TO, toUser); /* Para quem vai o email - Quem irá receber */
-		message.setSubject(assunto); /* Assunto do Email */
-		message.setText(mensagem);
-		
-		Transport.send(message);
+		   String subject = assunto;
+	       Content content = new Content("text/html", mensagem);
+
+	       Email from = new Email(userName);
+	       Email to = new Email(emailDestino);
+		Mail mail = new Mail(from, subject, to, content);
+
+	       SendGrid sg = new SendGrid(apiKey);
+	       Request request = new Request();
+
+	       request.setMethod(Method.POST);
+	       request.setEndpoint("mail/send");
+	       request.setBody(mail.build());
+
+	       com.sendgrid.Response response = sg.api(request);
+
+	       System.out.println(response.getStatusCode());
+	       System.out.println(response.getHeaders());
+	       System.out.println(response.getBody());	
+
 	}
+	
 	
 }
